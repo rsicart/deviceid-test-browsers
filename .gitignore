@@ -1,0 +1,6 @@
+# temporary files
+cookies.txt
+*.swp
+
+# node
+node_modules/
