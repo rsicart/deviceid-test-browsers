@@ -1,6 +1,7 @@
 # temporary files
 cookies.txt
 *.swp
+__pycache__/
 
 # node
 node_modules/
