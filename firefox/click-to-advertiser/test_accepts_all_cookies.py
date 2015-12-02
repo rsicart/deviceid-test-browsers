@@ -44,7 +44,11 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
 
 
     def test_allIsEmpty(self):
+        """ Device id in click's url querystring will be used to set 1st and 3rd party cookies.
+        """
 
+        """ http request
+        """
         # setup querystring
         device_id_querystring = '1447344866.44444444-4444-4444-aaaa-444444444444'
         url = self.url.format(device_id_querystring)
@@ -52,6 +56,8 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
         # http get
         self.browser.openUrl(url, self.timeout)
 
+        """ fetch all device ids from cookies and logs
+        """
         # fetch device ids from cookies
         self.cookies.setup()
         cookieFirst = self.cookies.get(self.cookie_name, self.domains['first'])
@@ -68,19 +74,27 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
         # fetch device ids from adsp logs
         devicesLogs = self.adsplog.getDeviceIds(self.adsplog.getLastLine())
 
+        """ assertions
+        """
+
         # cookies not empty
-        self.assertNotEqual(len(devicesFirst), 0, 'First party cookies are empty, but they should contain a device id.')
-        self.assertNotEqual(len(devicesThird), 0, 'Third party cookies are empty, but they should contain a device id.')
+        self.assertNotEqual(len(devicesFirst), 0, 'First party cookies are empty.')
+        self.assertNotEqual(len(devicesThird), 0, 'Third party cookies are empty.')
         # original device id from querystring is appended to cookie 1st
         self.assertIn(device_id_querystring, devicesFirst, 'Original device id from querystring was not found in first party cookies, but it should.')
-        # original device id from querystring saved in cookie 3rd
-        self.assertEqual(devicesFirst, devicesThird, 'Device ids found are different.')
-        # all device ids are logged
-        self.assertEqual(devicesFirst, devicesLogs, 'Device ids in adsp logs are different than device ids in cookies.')
+        # original device id from querystring saved in cookies 3rd
+        self.assertIn(device_id_querystring, devicesThird, 'Original device id from querystring was not found in third party cookies.')
+        # device id is logged
+        self.assertIn(device_id_querystring, devicesLogs, 'Original device id from querystring was not found in adsp logs.')
 
 
     def test_cookieThirdIsEmpty(self):
+        """ Device id in click's url querystring will be set in 3rd party cookies.
+            After that, device id in 3rd party cookies will be stacked into 1st party cookies.
+        """
 
+        """ http request
+        """
         # setup querystring
         device_id_querystring = '1447344866.44444444-4444-4444-bbbb-444444444444'
         url = self.url.format(device_id_querystring)
@@ -95,6 +109,8 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
         # http get
         self.browser.openUrl(url, self.timeout)
 
+        """ fetch all device ids from cookies and logs
+        """
         # fetch device ids from cookies
         self.cookies.setup()
         cookieFirst = self.cookies.get(self.cookie_name, self.domains['first'])
@@ -111,22 +127,32 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
         # fetch device ids from adsp logs
         devicesLogs = self.adsplog.getDeviceIds(self.adsplog.getLastLine())
 
+        """ assertions
+        """
+
         # cookies not empty
-        self.assertNotEqual(len(devicesFirst), 0, 'First party cookies are empty, but they should contain a device id.')
-        self.assertNotEqual(len(devicesThird), 0, 'Third party cookies are empty, but they should contain a device id.')
+        self.assertNotEqual(len(devicesFirst), 0, 'First party cookies are empty.')
+        self.assertNotEqual(len(devicesThird), 0, 'Third party cookies are empty.')
+        # original device id from cookie 1st still there
+        self.assertIn(deviceIdA, devicesFirst, 'Original device id was not found in first party cookies.')
         # original device id from querystring is appended to cookie 1st
         self.assertIn(device_id_querystring, devicesFirst, 'Original device id from querystring was not found in first party cookies, but it should.')
         # original device id from querystring saved in cookie 3rd
         self.assertIn(device_id_querystring, devicesThird, 'Original device id from querystring was not found in third party cookies, but it should.')
-        # original device id from cookie 1st still there
-        self.assertIn(deviceIdA, devicesFirst, 'Original device id was not found in first party cookies, seems that it was overriden by a new one.')
         # original device id from querystring is the first one in cookies 1st and 3rd (because 3rd were empty)
         self.assertEqual(devicesFirst[0], devicesThird[0], 'Device ids found are different.')
-        self.assertEqual(devicesFirst, devicesLogs, 'Device ids in adsp logs are different than device ids in cookies.')
+        # all device ids were logged
+        self.assertIn(deviceIdA, devicesLogs, 'Original device id from cookies was not found in adsp logs.')
+        self.assertIn(device_id_querystring, devicesLogs, 'Original device id from querystring was not found in adsp logs.')
 
 
     def test_cookieFirstIsEmpty(self):
+        """ Device id in click's url querystring will be replaced by device id in third party cookies.
+            After that, device id in 3rd party cookies will be stacked into 1st party cookies.
+        """
 
+        """ http request
+        """
         # setup querystring
         device_id_querystring = '1447344866.44444444-4444-4444-cccc-444444444444'
         url = self.url.format(device_id_querystring)
@@ -141,6 +167,8 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
         # http get
         self.browser.openUrl(url, self.timeout)
 
+        """ fetch all device ids from cookies and logs
+        """
         # fetch device ids from cookies
         self.cookies.setup()
         cookieFirst = self.cookies.get(self.cookie_name, self.domains['first'])
@@ -157,23 +185,30 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
         # fetch device ids from adsp logs
         devicesLogs = self.adsplog.getDeviceIds(self.adsplog.getLastLine())
 
+        """ assertions
+        """
         # cookies not empty
-        self.assertNotEqual(len(devicesFirst), 0, 'First party cookies are empty, but they should contain a device id.')
-        self.assertNotEqual(len(devicesThird), 0, 'Third party cookies are empty, but they should contain a device id.')
+        self.assertNotEqual(len(devicesFirst), 0, 'First party cookies are empty.')
+        self.assertNotEqual(len(devicesThird), 0, 'Third party cookies are empty.')
         # original device id in cookies third is still there
-        self.assertIn(deviceIdA, devicesThird, 'Original device id was not found in third party cookies, seems that it was overriden by a new one.')
+        self.assertIn(deviceIdA, devicesThird, 'Original device id was not found in third party cookies.')
         # cookies 1st restored from cookie 3rd
-        self.assertIn(deviceIdA, devicesFirst, 'Original device id was not found in first party cookies, seems that it was overriden by a new one.')
-        # original device id in querystring ignored because 3rd party cookies are enabled
-        self.assertNotIn(device_id_querystring, devicesFirst, 'Original device id from querystring was found in first party cookies, but it should not be there. When third party cookies are enabled, we use it as main option.')
-        # original device id is the first one, because cookies 3rd have de highest priority
-        self.assertEqual(devicesFirst[0], devicesThird[0], 'Device ids found are different.')
-        # original device id from third party cookies was logged
-        self.assertIn(deviceIdA, devicesLogs, 'Original device ids was not found in adsp logs.')
+        self.assertIn(deviceIdA, devicesFirst, 'Original device id was not found in first party cookies.')
+        # original device id in querystring ignored because device id was restored from cookies 3rd
+        self.assertNotIn(device_id_querystring, devicesFirst, 'Original device id from querystring was found in first party cookies.')
+        # device id is logged
+        self.assertIn(deviceIdA, devicesLogs, 'Original device id from cookies was found in adsp logs.')
+        # device id is not logged
+        self.assertNotIn(device_id_querystring, devicesLogs, 'Original device id from querystring was found in adsp logs.')
 
 
     def test_cookiesContainSameDevice(self):
+        """ Device id in click's url querystring will be replaced by device id in third party cookies.
+            Device ids in first party cookies will stay the same, like third party cookies.
+        """
 
+        """ http request
+        """
         # setup querystring
         device_id_querystring = '1447344866.44444444-4444-4444-dddd-444444444444'
         url = self.url.format(device_id_querystring)
@@ -189,6 +224,8 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
         # http get
         self.browser.openUrl(url, self.timeout)
 
+        """ fetch all device ids from cookies and logs
+        """
         # fetch device ids from cookies
         self.cookies.setup()
         cookieFirst = self.cookies.get(self.cookie_name, self.domains['first'])
@@ -205,23 +242,30 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
         # fetch device ids from adsp logs
         devicesLogs = self.adsplog.getDeviceIds(self.adsplog.getLastLine())
 
+        """ assertions
+        """
+
         # cookies not empty
-        self.assertNotEqual(len(devicesFirst), 0, 'First party cookies are empty, but they should contain a device id.')
-        self.assertNotEqual(len(devicesThird), 0, 'Third party cookies are empty, but they should contain a device id.')
-        # original device id in cookies first is still there
-        self.assertIn(deviceIdA, devicesFirst, 'Original device id was not found in first party cookies, seems that it was overriden by a new one.')
-        # original device id in cookies third is still there
-        self.assertIn(deviceIdA, devicesThird, 'Original device id was not found in third party cookies, seems that it was overriden by a new one.')
+        self.assertNotEqual(len(devicesFirst), 0, 'First party cookies are empty.')
+        self.assertNotEqual(len(devicesThird), 0, 'Third party cookies are empty.')
+        # original device id is still there
+        self.assertIn(deviceIdA, devicesFirst, 'Original device id was not found in first party cookies.')
+        self.assertIn(deviceIdA, devicesThird, 'Original device id was not found in third party cookies.')
         # original device id in querystring ignored because 3rd party cookies are enabled
-        self.assertNotIn(device_id_querystring, devicesFirst, 'Original device id from querystring was found in first party cookies, but it should not be there. When third party cookies are enabled, we use it as main option.')
-        # original device id is the first one, because cookies 3rd have de highest priority
-        self.assertEqual(devicesFirst[0], devicesThird[0], 'Device ids found are different.')
-        # original device id is logged
-        self.assertIn(deviceIdA, devicesLogs, 'Original device id was not found in adsp logs.')
+        self.assertNotIn(device_id_querystring, devicesFirst, 'Original device id from querystring was found in first party cookies.')
+        # original device id from cookies was logged
+        self.assertIn(deviceIdA, devicesLogs, 'Original device id from cookies was not found in adsp logs.')
+        # device id is not logged
+        self.assertNotIn(device_id_querystring, devicesLogs, 'Original device id from querystring was found in adsp logs.')
 
 
     def test_cookiesContainDifferentDevices(self):
+        """ Device id in click's url querystring will be replaced by device id in third party cookies.
+            After that, device id in 3rd party cookies will be stacked into 1st party cookies.
+        """
 
+        """ http request
+        """
         # setup querystring
         device_id_querystring = '1447344866.44444444-4444-4444-eeee-444444444444'
         url = self.url.format(device_id_querystring)
@@ -238,6 +282,8 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
         # http get
         self.browser.openUrl(url, self.timeout)
 
+        """ fetch all device ids from cookies and logs
+        """
         # fetch device ids from cookies
         self.cookies.setup()
         cookieFirst = self.cookies.get(self.cookie_name, self.domains['first'])
@@ -254,21 +300,24 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
         # fetch device ids from adsp logs
         devicesLogs = self.adsplog.getDeviceIds(self.adsplog.getLastLine())
 
+        """ assertions
+        """
+
         # cookies not empty
-        self.assertNotEqual(len(devicesFirst), 0, 'First party cookies are empty, but they should contain a device id.')
-        self.assertNotEqual(len(devicesThird), 0, 'Third party cookies are empty, but they should contain a device id.')
-        # original device id in cookies first is still there
-        self.assertIn(deviceIdA, devicesFirst, 'Original device id was not found in first party cookies, seems that it was overriden by a new one.')
-        # original device id in cookies third is still there
-        self.assertIn(deviceIdB, devicesThird, 'Original device id was not found in third party cookies, seems that it was overriden by a new one.')
+        self.assertNotEqual(len(devicesFirst), 0, 'First party cookies are empty.')
+        self.assertNotEqual(len(devicesThird), 0, 'Third party cookies are empty.')
+        # original device id is still there
+        self.assertIn(deviceIdA, devicesFirst, 'Original device id was not found in first party cookies.')
+        self.assertIn(deviceIdB, devicesThird, 'Original device id was not found in third party cookies.')
+        # device id from cookies 3rd prepended to cookies 1st
         self.assertIn(deviceIdB, devicesFirst, 'Original device id from third party cookies was not found in first party cookies, but it should be in.')
         # original device id in querystring ignored because 3rd party cookies are enabled
-        self.assertNotIn(device_id_querystring, devicesFirst, 'Original device id from querystring was found in first party cookies, but it should not be there. When third party cookies are enabled, we use it as main option.')
-        # original device id is the first one, because cookies 3rd have de highest priority
-        self.assertEqual(devicesFirst[0], devicesThird[0], 'Device ids found are different.')
+        self.assertNotIn(device_id_querystring, devicesFirst, 'Original device id from querystring was found in first party cookies.')
         # all device ids were logged
-        self.assertIn(deviceIdA, devicesLogs, 'Original device id from cookie first was not found in adsp logs.')
-        self.assertIn(deviceIdB, devicesLogs, 'Original device id from cookie third was not found in adsp logs.')
+        self.assertIn(deviceIdA, devicesLogs, 'Original device id from cookies was found in adsp logs.')
+        self.assertIn(deviceIdB, devicesLogs, 'Original device id from cookies was found in adsp logs.')
+        # device id is not logged
+        self.assertNotIn(device_id_querystring, devicesLogs, 'Original device id from querystring was found in adsp logs.')
 
 
     def tearDown(self):
