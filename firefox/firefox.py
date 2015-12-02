@@ -107,11 +107,15 @@ class Blacklist(Database):
 
         today = datetime.today()
 
+        origin = domain
+        if 'http' not in domain:
+            origin = 'http://*.{}'.format(domain)
+
         if modificationTime is None:
             modificationTime = int(today.timestamp() * 1000) # in milliseconds
 
         query = 'INSERT INTO {}(origin, type, permission, expireType, expireTime, modificationTime) VALUES (?, ?, ?, ?, ?, ?);'.format(self.db_table)
-        values = (domain, type, permission, expireType, expireTime, modificationTime)
+        values = (origin, type, permission, expireType, expireTime, modificationTime)
         cookie = self.db_cursor.execute(query, values);
         self.db_connection.commit()
 
