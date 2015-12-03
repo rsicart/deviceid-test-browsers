@@ -4,6 +4,7 @@ from firefox.firefox import *
 from common.adsplog import *
 import unittest
 import time
+import settings
 
 class TestFirefoxAcceptOnlyThirdPartyCookies(unittest.TestCase):
     """ Test suite to test a click on an Ad in publisher's website and a redirect to advertiser's website
@@ -15,25 +16,25 @@ class TestFirefoxAcceptOnlyThirdPartyCookies(unittest.TestCase):
 
     def setUp(self):
 
-        time.sleep(5)
+        time.sleep(settings.wait_before)
 
         # setup adsp log
-        self.adsplog = AdspLog('/home/rsicart/Repo/adsp-front/sd/www2/www/data/access')
+        self.adsplog = AdspLog(settings.folder_adsp_logs)
 
         # setup website
-        self.url = 'http://www2.adsp.localhost/click.php?id=2763-21915-5069&context-hash=e0ff593dd1fbda31689e7e1826d4e4aef0394f5a&di={}&data=&preurl='
-        self.timeout = 4
-        self.cookie_name = 'adsp_di'
-        self.domains = {'first': 'advertiser.localhost', 'third': '.adsp.localhost'}
+        self.url = settings.url
+        self.timeout = settings.http_get_timeout
+        self.cookie_name = settings.cookie_name
+        self.domains = settings.domains
 
         # setup firefox
-        profile_name = 'CookiesAll'
-        profile_folder = '/home/rsicart/.mozilla/firefox/jl065qo8.CookiesAll'
+        profile_name = settings.firefox['profile_name']
+        profile_folder = settings.firefox['profile_folder']
         self.browser = Firefox(profile_name, profile_folder)
 
         # flush cookies before browsing
-        db_name = 'cookies.sqlite'
-        db_table = 'moz_cookies'
+        db_name = settings.firefox['cookie_db']
+        db_table = settings.firefox['cookie_table']
         self.cookies = Cookies(profile_folder, db_name, db_table)
         self.cookies.setup()
         self.cookies.flush()
@@ -43,8 +44,8 @@ class TestFirefoxAcceptOnlyThirdPartyCookies(unittest.TestCase):
         self.browser.setCookieBehavior('all')
 
         # blacklist first party domain
-        db_name = 'permissions.sqlite'
-        db_table = 'moz_perms'
+        db_name = settings.firefox['permission_db']
+        db_table = settings.firefox['permission_table']
         self.blacklist = Blacklist(profile_folder, db_name, db_table)
         self.blacklist.setup()
         self.blacklist.add(self.domains['first'])

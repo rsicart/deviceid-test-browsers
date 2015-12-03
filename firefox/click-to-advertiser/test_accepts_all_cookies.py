@@ -4,6 +4,7 @@ from firefox.firefox import *
 from common.adsplog import *
 import unittest
 import time
+import settings
 
 class TestFirefoxAcceptAllCookies(unittest.TestCase):
     """ Test suite to test a click on an Ad in publisher's website and a redirect to advertiser's website
@@ -15,25 +16,25 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
 
     def setUp(self):
 
-        time.sleep(5)
+        time.sleep(settings.wait_before)
 
         # setup adsp log
-        self.adsplog = AdspLog('/home/rsicart/Repo/adsp-front/sd/www2/www/data/access')
+        self.adsplog = AdspLog(settings.folder_adsp_logs)
 
         # setup website
-        self.url = 'http://www2.adsp.localhost/click.php?id=2763-21915-5069&context-hash=e0ff593dd1fbda31689e7e1826d4e4aef0394f5a&di={}&data=&preurl='
-        self.timeout = 4
-        self.cookie_name = 'adsp_di'
-        self.domains = {'first': 'advertiser.localhost', 'third': '.adsp.localhost'}
+        self.url = settings.url
+        self.timeout = settings.http_get_timeout
+        self.cookie_name = settings.cookie_name
+        self.domains = settings.domains
 
         # setup firefox
-        profile_name = 'CookiesAll'
-        profile_folder = '/home/rsicart/.mozilla/firefox/jl065qo8.CookiesAll'
+        profile_name = settings.firefox['profile_name']
+        profile_folder = settings.firefox['profile_folder']
         self.browser = Firefox(profile_name, profile_folder)
 
         # flush cookies before browsing
-        db_name = 'cookies.sqlite'
-        db_table = 'moz_cookies'
+        db_name = settings.firefox['cookie_db']
+        db_table = settings.firefox['cookie_table']
         self.cookies = Cookies(profile_folder, db_name, db_table)
         self.cookies.setup()
         self.cookies.flush()
@@ -139,8 +140,6 @@ class TestFirefoxAcceptAllCookies(unittest.TestCase):
         self.assertIn(device_id_querystring, devicesFirst, 'Original device id from querystring was not found in first party cookies, but it should.')
         # original device id from querystring saved in cookie 3rd
         self.assertIn(device_id_querystring, devicesThird, 'Original device id from querystring was not found in third party cookies, but it should.')
-        # original device id from querystring is the first one in cookies 1st and 3rd (because 3rd were empty)
-        self.assertEqual(devicesFirst[0], devicesThird[0], 'Device ids found are different.')
         # all device ids were logged
         self.assertIn(deviceIdA, devicesLogs, 'Original device id from cookies was not found in adsp logs.')
         self.assertIn(device_id_querystring, devicesLogs, 'Original device id from querystring was not found in adsp logs.')

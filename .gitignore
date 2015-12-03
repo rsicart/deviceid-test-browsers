@@ -6,3 +6,6 @@ __pycache__/
 
 # node
 node_modules/
+
+# settings
+settings.py
