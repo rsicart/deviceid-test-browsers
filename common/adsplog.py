@@ -48,9 +48,3 @@ class AdspLog:
             return data['deviceIds']
         return None
 
-
-if __name__ == '__main__':
-
-	logs = AdspLog('/home/rsicart/Repo/adsp-front/sd/www2/www/data/access')
-	line = logs.getLastLine()
-	print(logs.getDeviceIds(line))
