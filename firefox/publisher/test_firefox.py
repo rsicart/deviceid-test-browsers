@@ -22,10 +22,10 @@ class TestFirefox(unittest.TestCase):
         self.adsplog = AdspLog(settings.folder_adsp_logs)
 
         # setup website
-        self.url = settings.url
+        self.url = settings.publisher['url']
         self.timeout = settings.http_get_timeout
         self.cookie_name = settings.cookie_name
-        self.domains = settings.domains
+        self.domains = settings.publisher['domains']
 
         # setup firefox
         self.browser = Firefox(settings.firefox['profile_name'], settings.firefox['profile_folder'])

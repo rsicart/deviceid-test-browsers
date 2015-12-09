@@ -21,7 +21,7 @@ class TestFirefoxAcceptOnlyThirdPartyCookies(test_firefox.TestFirefox):
         db_table = 'moz_perms'
         self.blacklist = Blacklist(settings.firefox['profile_folder'], settings.firefox['permission_db'], settings.firefox['permission_table'])
         self.blacklist.setup()
-        self.blacklist.add(settings.domains['first'])
+        self.blacklist.add(settings.publisher['domains']['first'])
         self.blacklist.close()
 
 

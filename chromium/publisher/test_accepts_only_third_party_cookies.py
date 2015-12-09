@@ -22,7 +22,7 @@ class TestChromiumAcceptOnlyThirdPartyCookies(test_chromium.TestChromium):
         self.browser.setCookieBehavior('all')
 
         # blacklist first party domain
-        self.browser.blacklist(settings.domains['first'])
+        self.browser.blacklist(settings.publisher['domains']['first'])
 
 
     def test_allIsEmpty(self):
